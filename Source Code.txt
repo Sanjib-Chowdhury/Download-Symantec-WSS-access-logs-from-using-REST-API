@@ -1,0 +1,68 @@
+echo "**********************************************************************************************************"
+echo "* Purpose:                                                                                               *"
+echo "*    This script can be used to export access logs from Symantec WSS using API call                      *"
+echo "*                                                                                                        *"
+echo "* Usecase:                                                                                               *"
+echo "*    The output is useful in troubleshooting acccess issue or log review                                 *"
+echo "*                                                                                                        *"
+echo "*                                                                                                        *"
+echo "* How to use:                                                                                            *"
+echo "*    Input the fields when prompted & hit enter. A file out.txt will get generated.                      *"
+echo "*    Read the message in the output file. This should be run in a directory with R/W access.             *"
+echo "*                                                                                                        *"
+echo "* Disclaimer:                                                                                            *"
+echo "*    There is no guarantee/ warranty that it will work as intended, though it worked fine during testing.*" 
+echo "*    Use at your own risk -:). Report bug to sanjib_25@yahoo.com                                         *"
+echo "*    Visit https://github.com/Sanjib-Chowdhury for more tools.                                           *"
+echo "**********************************************************************************************************"
+echo ""
+
+# Get User inputs
+$User = Read-Host 'Input the API user name & hit enter'
+$Pass = Read-Host 'Input the API password & hit enter'
+write-host "End Date/ Time must be later than Start Date/ Time" -foreground black -background green
+$Start = Read-Host 'Input the Start Date & hour as DD-MM-YYYY hh & hit enter'
+$End = Read-Host 'Input the End Date & hour as as DD-MM-YYYY hh & hit enter'
+
+# Convert startDate to Unixmilliseconds
+
+$startHour = "$($Start):00:00"
+$startDate1 = Get-Date -Date $startHour
+$startDate = ([DateTimeOffset]$startDate1).ToUnixTimeMilliseconds()
+
+# Convert endDate to Unixmilliseconds
+
+$endHour = "$($End):00:00"
+$endDate1 = Get-Date -Date $endHour
+$endDate = ([DateTimeOffset]$endDate1).ToUnixTimeMilliseconds()
+
+
+write-host "Logs are being downloaded as logs.zip. Open the archive after download is complete." -foreground black -background yellow
+
+#API call
+
+$uri = "https://portal.threatpulse.com/reportpod/logs/sync?&startDate="+$startDate+"&endDate="+$endDate+"&token=none"
+invoke-restmethod -verbose -headers @{"X-APIUsername" = $User; "X-APIPassword" = $Pass;} -uri $uri -outfile logs.zip
+
+
+echo "**************************************************************" > out.txt
+echo "*     Symantec WSS Access log download tool using API        *" >> out.txt
+echo "*          Report bug to sanjib_25@yahoo.com                 *" >> out.txt
+echo "*  Visit https://github.com/Sanjib-Chowdhury for more tools  *" >> out.txt
+echo "**************************************************************" >> out.txt
+echo "Date: $date                                                   " >> out.txt
+echo "Logs are downloaded as logs.zip. Extract the archive to see   " >> out.txt
+echo "the log files downloaded                                      " >> out.txt
+echo "**************************************************************" >> out.txt
+notepad out.txt
+#--------------------------------------------------------------------------
+#Abandoned 
+#$Start = $start.replace(' ','')
+#$StartHour = get-date -minute 0 -second 0 -mill 0
+#$startDate = ([DateTimeOffset]$StartHour).ToUnixTimeMilliseconds()
+#$endHour = ($StartHour).addhours(-1)
+#$endDate = Get-Date -Date $endHour -UFormat %s
+#-----------------------------------------
+
+
+
